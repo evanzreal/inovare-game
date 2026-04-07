@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -20,12 +20,60 @@ const EMAIL_MAP: Record<string, string> = {
   Lais:     'lais@inovareseguros.com.br',
 }
 
+// Partículas flutuantes decorativas
+function Particles() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full opacity-20"
+          style={{
+            width: `${4 + (i % 4) * 3}px`,
+            height: `${4 + (i % 4) * 3}px`,
+            left: `${8 + i * 8}%`,
+            top: `${10 + (i * 17) % 80}%`,
+            background: i % 3 === 0 ? '#a855f7' : i % 3 === 1 ? '#06b6d4' : '#eab308',
+            animation: `floatParticle ${4 + i % 4}s ease-in-out ${i * 0.4}s infinite`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes floatParticle {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.15; }
+          50% { transform: translateY(-18px) scale(1.2); opacity: 0.35; }
+        }
+        @keyframes scanline {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100vh); }
+        }
+        @keyframes glitch {
+          0%, 94%, 100% { transform: translate(0); }
+          95% { transform: translate(-2px, 1px); }
+          97% { transform: translate(2px, -1px); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes borderPulse {
+          0%, 100% { border-color: rgba(168,85,247,0.4); box-shadow: 0 0 12px rgba(168,85,247,0.2); }
+          50% { border-color: rgba(168,85,247,0.9); box-shadow: 0 0 24px rgba(168,85,247,0.5); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const [selected, setSelected] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -44,95 +92,185 @@ export default function LoginPage() {
       return
     }
 
-    // Small delay to let Supabase finish writing session to localStorage
     await new Promise(r => setTimeout(r, 300))
     router.push('/perfil')
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6"
-      style={{ background: 'var(--bg)' }}>
+    <div className="min-h-dvh flex flex-col items-center justify-center px-6 relative overflow-hidden"
+      style={{ background: 'radial-gradient(ellipse at 50% 0%, #1a0a2e 0%, #0a0a0f 60%)' }}>
 
-      {/* Logo / título */}
-      <div className="mb-10 text-center">
-        <div className="text-4xl font-black tracking-widest mb-1"
-          style={{ color: 'var(--accent2)', letterSpacing: '0.15em' }}>
-          VENDAS.EXE
-        </div>
-        <div className="text-xs tracking-widest uppercase"
-          style={{ color: 'var(--muted)' }}>
-          Sistema de Gamificação · Inovare
-        </div>
-      </div>
+      <Particles />
 
-      <form onSubmit={handleLogin} className="w-full max-w-sm flex flex-col gap-4">
-        {/* Seleção de vendedora */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-            style={{ color: 'var(--muted)' }}>
-            Quem é você?
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {VENDEDORAS.map(nome => (
-              <button
-                key={nome}
-                type="button"
-                onClick={() => setSelected(nome)}
-                className="py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-150"
-                style={{
-                  background: selected === nome ? 'var(--accent)' : 'var(--surface)',
-                  border: `1px solid ${selected === nome ? 'var(--accent2)' : 'var(--border)'}`,
-                  color: selected === nome ? '#fff' : 'var(--muted)',
-                  boxShadow: selected === nome ? '0 0 16px rgba(124,58,237,0.4)' : 'none',
-                }}
-              >
-                {nome}
-              </button>
+      {/* Scanline sutil */}
+      <div className="fixed inset-0 pointer-events-none"
+        style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)' }} />
+
+      {/* Glow central no topo */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse, rgba(124,58,237,0.25) 0%, transparent 70%)' }} />
+
+      <div className={`relative z-10 w-full max-w-sm transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+
+        {/* Trophy + título */}
+        <div className="text-center mb-10">
+          <div className="text-6xl mb-4" style={{ animation: 'floatParticle 3s ease-in-out infinite', display: 'inline-block' }}>
+            🏆
+          </div>
+
+          {/* VENDAS.EXE com efeito glitch */}
+          <div className="relative mb-2">
+            <h1
+              className="text-5xl font-black tracking-widest"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 40%, #06b6d4 100%)',
+                backgroundSize: '200% auto',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                animation: 'shimmer 3s linear infinite, glitch 6s ease-in-out infinite',
+                letterSpacing: '0.12em',
+                fontFamily: 'system-ui',
+              }}>
+              VENDAS
+            </h1>
+            <div className="flex items-center justify-center gap-2 mt-1">
+              <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.5))' }} />
+              <span className="text-sm font-black tracking-[0.3em] px-2"
+                style={{ color: '#a855f7', fontFamily: 'monospace' }}>
+                .EXE
+              </span>
+              <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(168,85,247,0.5), transparent)' }} />
+            </div>
+          </div>
+
+          <div className="text-xs tracking-[0.25em] uppercase mt-3"
+            style={{ color: 'rgba(148,163,184,0.6)', fontFamily: 'monospace' }}>
+            ▸ ARENA DE VENDAS · INOVARE ◂
+          </div>
+
+          {/* Badges decorativos */}
+          <div className="flex justify-center gap-3 mt-4">
+            {['⚡ LIVE', '🎮 SEASON 1', '🔥 ATIVO'].map(b => (
+              <span key={b} className="text-xs px-2 py-0.5 rounded-full font-bold"
+                style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}>
+                {b}
+              </span>
             ))}
           </div>
         </div>
 
-        {/* Senha */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-            style={{ color: 'var(--muted)' }}>
-            Senha
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            className="w-full py-3 px-4 rounded-xl text-sm outline-none transition-all"
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              color: 'var(--text)',
-            }}
-          />
-        </div>
+        <form onSubmit={handleLogin} className="flex flex-col gap-5">
 
-        {error && (
-          <div className="text-sm text-center py-2 px-4 rounded-lg"
-            style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--red)', border: '1px solid rgba(239,68,68,0.3)' }}>
-            {error}
+          {/* Seleção de jogador */}
+          <div>
+            <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-3"
+              style={{ color: 'rgba(148,163,184,0.7)', fontFamily: 'monospace' }}>
+              <span style={{ color: '#a855f7' }}>▸</span>
+              SELECIONE SEU PERSONAGEM
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {VENDEDORAS.map(nome => (
+                <button
+                  key={nome}
+                  type="button"
+                  onClick={() => setSelected(nome)}
+                  className="py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 relative overflow-hidden"
+                  style={{
+                    background: selected === nome
+                      ? 'linear-gradient(135deg, rgba(124,58,237,0.4), rgba(168,85,247,0.2))'
+                      : 'rgba(18,18,26,0.8)',
+                    border: `1px solid ${selected === nome ? '#a855f7' : 'rgba(42,42,58,0.8)'}`,
+                    color: selected === nome ? '#fff' : 'rgba(148,163,184,0.7)',
+                    boxShadow: selected === nome ? '0 0 20px rgba(124,58,237,0.35), inset 0 0 20px rgba(124,58,237,0.05)' : 'none',
+                    transform: selected === nome ? 'scale(1.02)' : 'scale(1)',
+                    animation: selected === nome ? 'borderPulse 2s ease-in-out infinite' : 'none',
+                  }}>
+                  {selected === nome && (
+                    <span className="absolute top-1 right-2 text-xs" style={{ color: '#a855f7' }}>▸</span>
+                  )}
+                  {nome}
+                </button>
+              ))}
+            </div>
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={loading || !selected || !password}
-          className="w-full py-4 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-150 disabled:opacity-40"
-          style={{
-            background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
-            color: '#fff',
-            boxShadow: '0 0 20px rgba(124,58,237,0.4)',
-          }}
-        >
-          {loading ? 'Entrando...' : 'Entrar no Jogo →'}
-        </button>
-      </form>
+          {/* Senha */}
+          <div>
+            <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-3"
+              style={{ color: 'rgba(148,163,184,0.7)', fontFamily: 'monospace' }}>
+              <span style={{ color: '#06b6d4' }}>▸</span>
+              CÓDIGO DE ACESSO
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              className="w-full py-3.5 px-4 rounded-xl text-sm outline-none transition-all"
+              style={{
+                background: 'rgba(18,18,26,0.8)',
+                border: '1px solid rgba(42,42,58,0.8)',
+                color: '#f1f5f9',
+                fontFamily: 'monospace',
+                letterSpacing: '0.1em',
+              }}
+              onFocus={e => {
+                e.target.style.border = '1px solid rgba(168,85,247,0.6)'
+                e.target.style.boxShadow = '0 0 16px rgba(124,58,237,0.2)'
+              }}
+              onBlur={e => {
+                e.target.style.border = '1px solid rgba(42,42,58,0.8)'
+                e.target.style.boxShadow = 'none'
+              }}
+            />
+          </div>
+
+          {error && (
+            <div className="text-sm text-center py-2.5 px-4 rounded-xl font-mono"
+              style={{
+                background: 'rgba(239,68,68,0.08)',
+                color: '#ef4444',
+                border: '1px solid rgba(239,68,68,0.3)',
+              }}>
+              ⚠ {error}
+            </div>
+          )}
+
+          {/* Botão entrar */}
+          <button
+            type="submit"
+            disabled={loading || !selected || !password}
+            className="w-full py-4 rounded-xl font-black text-sm tracking-widest uppercase relative overflow-hidden transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background: loading
+                ? 'rgba(124,58,237,0.5)'
+                : 'linear-gradient(135deg, #7c3aed, #a855f7, #06b6d4)',
+              backgroundSize: '200% auto',
+              color: '#fff',
+              boxShadow: (!loading && selected && password)
+                ? '0 0 30px rgba(124,58,237,0.5), 0 4px 20px rgba(0,0,0,0.3)'
+                : 'none',
+              animation: (!loading && selected && password) ? 'shimmer 2s linear infinite' : 'none',
+              letterSpacing: '0.15em',
+            }}>
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span style={{ display: 'inline-block', animation: 'floatParticle 0.6s ease-in-out infinite' }}>◈</span>
+                CARREGANDO...
+              </span>
+            ) : (
+              '▶  ENTRAR NO JOGO'
+            )}
+          </button>
+        </form>
+
+        {/* Rodapé */}
+        <div className="text-center mt-8 text-xs"
+          style={{ color: 'rgba(148,163,184,0.3)', fontFamily: 'monospace', letterSpacing: '0.1em' }}>
+          INOVARE SEGUROS © 2026 · v1.0
+        </div>
+      </div>
     </div>
   )
 }
